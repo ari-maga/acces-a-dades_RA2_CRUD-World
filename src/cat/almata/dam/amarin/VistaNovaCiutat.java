@@ -23,6 +23,8 @@ import java.sql.SQLException;
 import java.util.Vector;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class VistaNovaCiutat extends JDialog {
 
@@ -88,6 +90,14 @@ public class VistaNovaCiutat extends JDialog {
 		}
 		{
 			txfNom = new JTextField();
+			txfNom.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyTyped(KeyEvent e) {
+					if(txfNom.getText().length()>34) {
+						e.consume();
+					}
+				}
+			});
 			GridBagConstraints gbc_txfNom = new GridBagConstraints();
 			gbc_txfNom.insets = new Insets(0, 0, 5, 0);
 			gbc_txfNom.fill = GridBagConstraints.HORIZONTAL;
@@ -113,7 +123,7 @@ public class VistaNovaCiutat extends JDialog {
 				cbxPais_1.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						try {
-							cbxDistricte.setModel((ComboBoxModel<String>) new JComboBox<String>(DataActions.getVectorDistrictes((String) cbxPais.getSelectedItem())));
+							cbxDistricte.setModel( new JComboBox<String>(DataActions.getVectorDistrictes((String) cbxPais_1.getSelectedItem())).getModel());
 						} catch (SQLException e1) {
 							JOptionPane.showMessageDialog(altaCiutat,  "ERROR! En llistar els Districtes (VistaAltaCiutat, lin. 1)\n\n"+e1.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
 						}
@@ -163,6 +173,27 @@ public class VistaNovaCiutat extends JDialog {
 		}
 		{
 			txfPoblacio = new JTextField();
+			txfPoblacio.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyTyped(KeyEvent e) {
+					if(!esNumero(e.getKeyChar())||txfPoblacio.getText().length()>9) {
+						e.consume();
+					}
+				}
+				private boolean esNumero(char caracter) {
+					if(caracter == '0'||
+							caracter == '1' ||
+							caracter == '2' ||
+							caracter == '3' ||
+							caracter == '4' ||
+							caracter == '5' ||
+							caracter == '6' ||
+							caracter == '7' ||
+							caracter == '8' ||
+							caracter == '9')return true;
+					return false;
+				}
+			});
 			GridBagConstraints gbc_txfPoblacio = new GridBagConstraints();
 			gbc_txfPoblacio.fill = GridBagConstraints.HORIZONTAL;
 			gbc_txfPoblacio.gridx = 1;
@@ -180,6 +211,8 @@ public class VistaNovaCiutat extends JDialog {
 					public void actionPerformed(ActionEvent e) {
 						
 						altaCiutat.dispose();
+						owner.setEnabled(true);
+						owner.requestFocus();
 					}
 				});
 				btnAfegir.setActionCommand("OK");
@@ -190,14 +223,15 @@ public class VistaNovaCiutat extends JDialog {
 				JButton btnCancelar = new JButton("Cancel·lar");
 				btnCancelar.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						altaCiutat.dispose();
+						altaCiutat.dispose();;
+						owner.setEnabled(true);
+						owner.requestFocus();
 					}
 				});
 				btnCancelar.setActionCommand("Cancel");
 				pnlBotons.add(btnCancelar);
 			}
 		}
-		
 	}
 
 }

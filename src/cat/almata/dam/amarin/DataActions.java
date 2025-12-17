@@ -15,11 +15,13 @@ public class DataActions {
 	
 	public static List<DTOMainformCiutat> getAllCiutats() throws SQLException{
 		try(Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/world" ,"root","user")){
+			//Aquest és l'sql que s'executara en base de dades
 			String sql = "SELECT city.name as cityname, country.name as countryname, district, city.population as citypopulation "
 					+ "FROM city LEFT JOIN country ON city.CountryCode=country.code order by cityname;";
 			Statement statement = con.createStatement();
 			ResultSet  result = statement.executeQuery(sql);
 			List<DTOMainformCiutat> ciutats = new ArrayList<DTOMainformCiutat>();
+			//de cada resultat creo una nova instancia de la classe ciutat i la posa a dins de la llista
 			while(result.next()) {
 				ciutats.add(new DTOMainformCiutat(
 						result.getString("cityname"),
@@ -28,6 +30,7 @@ public class DataActions {
 						result.getLong("citypopulation")
 						));
 			}
+			//ho tanco tot
 			result.close();
 			statement.close();
 			con.close();
@@ -83,7 +86,7 @@ public class DataActions {
 	}
 	public static Vector<String> getVectorDistrictes(String nomPais) throws SQLException {
 		try(Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/world" ,"root","user")){
-			String sql = "SELECT district "
+			String sql = "SELECT DISTINCT district "
 					+ "FROM city LEFT JOIN country ON city.CountryCode=country.code WHERE country.name = '"+nomPais+"' ORDER BY district;";
 			Statement statement = con.createStatement();
 			ResultSet  result = statement.executeQuery(sql);

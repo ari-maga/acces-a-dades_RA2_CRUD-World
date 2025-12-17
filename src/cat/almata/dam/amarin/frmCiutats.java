@@ -100,8 +100,11 @@ public class frmCiutats {
 		JButton btnNovaCiutat = new JButton("Nova Ciutat");
 		btnNovaCiutat.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				//obro el JDialog de posar la nova ciutat
 				VistaNovaCiutat  altaCiutat= new VistaNovaCiutat(finestraCiutats);
 				altaCiutat.setVisible(true);
+				//desactivo la finestra actual perque sino podria obrir múltiples instancies de d'alata
+				finestraCiutats.setEnabled(false);
 			}
 		});
 		pnlInferior.add(btnNovaCiutat);
