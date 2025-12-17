@@ -9,6 +9,8 @@ import java.awt.BorderLayout;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+
+
 import javax.swing.JButton;
 import javax.swing.JTextField;
 
@@ -60,7 +62,7 @@ public class frmCiutats {
 				try {
 					fillCiutats(DataActions.getAllCiutats());
 				}catch (SQLException e1){
-					JOptionPane.showMessageDialog(finestraCiutats,  "ERROR! En llistar les ciutat (frmCiutats, lin. 61)\n\n"+e1.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(finestraCiutats,  "ERROR! En llistar les ciutats (frmCiutats, lin. 61)\n\n"+e1.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
@@ -84,7 +86,7 @@ public class frmCiutats {
 				try {
 					fillCiutats(DataActions.getCiutats(txfCercaCiutat.getText()));
 				}catch (SQLException e1){
-					JOptionPane.showMessageDialog(finestraCiutats,  "ERROR! En llistar les ciutat (frmCiutats, lin. 85)\n\n"+e1.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(finestraCiutats,  "ERROR! En llistar les ciutats (frmCiutats, lin. 85)\n\n"+e1.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
@@ -98,6 +100,8 @@ public class frmCiutats {
 		JButton btnNovaCiutat = new JButton("Nova Ciutat");
 		btnNovaCiutat.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				VistaNovaCiutat  altaCiutat= new VistaNovaCiutat(finestraCiutats);
+				altaCiutat.setVisible(true);
 			}
 		});
 		pnlInferior.add(btnNovaCiutat);
@@ -105,6 +109,8 @@ public class frmCiutats {
 		JButton btnModificaCiutat = new JButton("Modifica Ciutat");
 		btnModificaCiutat.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				//VistaNovaCiutat  updateCiutat= new VistaEditaCiutat(finestraCiutats);
+				//updateCiutat.setVisible(true);
 			}
 		});
 		pnlInferior.add(btnModificaCiutat);
@@ -112,7 +118,16 @@ public class frmCiutats {
 		JButton btnEsborraCiutat = new JButton("Esborra Ciutat");
 		btnEsborraCiutat.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				String nomCiutat =  (String) tblCiutats.getValueAt(tblCiutats.getSelectedRow(), 0);
+				String nomPais =  (String) tblCiutats.getValueAt(tblCiutats.getSelectedRow(), 1);
+				//borro la ciutat a la base de dades
+				try {
+					DataActions.deleteCiutat(nomCiutat, nomPais);
+				} catch (SQLException e1) {
+					JOptionPane.showMessageDialog(finestraCiutats,  "ERROR! En esborrar la ciutat "+nomCiutat+" (frmCiutats, lin. 121)\n\n"+e1.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
+				}
+				//borro la ciutat de la taula
+				((DefaultTableModel)tblCiutats.getModel()).removeRow(tblCiutats.getSelectedRow());
 			}
 		});
 		pnlInferior.add(btnEsborraCiutat);

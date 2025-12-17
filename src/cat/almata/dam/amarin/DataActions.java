@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
+
+import javax.swing.ComboBoxModel;
 
 public class DataActions {
 	
@@ -34,7 +37,7 @@ public class DataActions {
 	public static List<DTOMainformCiutat> getCiutats(String nomCiutat) throws SQLException{
 		try(Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/world" ,"root","user")){
 			String sql = "SELECT city.name as cityname, country.name as countryname, district, city.population as citypopulation "
-					+ "FROM city LEFT JOIN country ON city.CountryCode=country.code WHERE cityname LIKE '%"+nomCiutat+"%' ORDER BY cityname;";
+					+ "FROM city LEFT JOIN country ON city.CountryCode=country.code WHERE city.name LIKE '%"+nomCiutat+"%' ORDER BY cityname;";
 			Statement statement = con.createStatement();
 			ResultSet  result = statement.executeQuery(sql);
 			List<DTOMainformCiutat> ciutats = new ArrayList<DTOMainformCiutat>();
@@ -60,6 +63,38 @@ public class DataActions {
 			statement.executeUpdate(sql);
 			statement.close();
 			con.close();
+		}
+	}
+	public static Vector<String> getVectorPaisos() throws SQLException {
+		try(Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/world" ,"root","user")){
+			String sql = "SELECT name AS countryname "
+					+ "FROM country ORDER BY name;";
+			Statement statement = con.createStatement();
+			ResultSet  result = statement.executeQuery(sql);
+			Vector<String> paisos = new Vector<String>();
+			while(result.next()) {
+				paisos.add(result.getString("countryname"));
+			}
+			result.close();
+			statement.close();
+			con.close();
+			return paisos;
+		}
+	}
+	public static Vector<String> getVectorDistrictes(String nomPais) throws SQLException {
+		try(Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/world" ,"root","user")){
+			String sql = "SELECT district "
+					+ "FROM city LEFT JOIN country ON city.CountryCode=country.code WHERE country.name = '"+nomPais+"' ORDER BY district;";
+			Statement statement = con.createStatement();
+			ResultSet  result = statement.executeQuery(sql);
+			Vector<String> districtes = new Vector<String>();
+			while(result.next()) {
+				districtes.add(result.getString("district"));
+			}
+			result.close();
+			statement.close();
+			con.close();
+			return districtes;
 		}
 	}
 }

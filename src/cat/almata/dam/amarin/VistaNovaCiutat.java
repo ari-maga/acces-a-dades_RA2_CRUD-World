@@ -3,17 +3,26 @@ package cat.almata.dam.amarin;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
+import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.GridBagLayout;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.GridBagConstraints;
 import javax.swing.JTextField;
 import java.awt.Insets;
 import javax.swing.JComboBox;
 import java.awt.Font;
+import java.awt.event.ActionListener;
+import java.sql.SQLException;
+import java.util.Vector;
+import java.awt.event.ActionEvent;
+import javax.swing.SwingConstants;
 
 public class VistaNovaCiutat extends JDialog {
 
@@ -21,13 +30,17 @@ public class VistaNovaCiutat extends JDialog {
 	private final JPanel pnlContingut = new JPanel();
 	private JTextField txfNom;
 	private JTextField txfPoblacio;
+	private VistaNovaCiutat altaCiutat;
+	private JComboBox<String> cbxPais;
+	private JComboBox<String> cbxPais_1;
+	private JComboBox<String> cbxDistricte;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		try {
-			VistaNovaCiutat dialog = new VistaNovaCiutat();
+			VistaNovaCiutat dialog = new VistaNovaCiutat(new JFrame());
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
@@ -38,7 +51,9 @@ public class VistaNovaCiutat extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public VistaNovaCiutat() {
+	public VistaNovaCiutat(JFrame owner) {
+		super(owner);
+		altaCiutat = this;
 		setTitle("Nova Ciutat");
 		setBounds(100, 100, 306, 239);
 		getContentPane().setLayout(new BorderLayout());
@@ -92,13 +107,27 @@ public class VistaNovaCiutat extends JDialog {
 			pnlContingut.add(lblPais, gbc_lblPais);
 		}
 		{
-			JComboBox cbxPais = new JComboBox();
+			cbxPais = new JComboBox<String>();
+			try {
+				cbxPais_1 = new JComboBox<String>(DataActions.getVectorPaisos());
+				cbxPais_1.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						try {
+							cbxDistricte.setModel((ComboBoxModel<String>) new JComboBox<String>(DataActions.getVectorDistrictes((String) cbxPais.getSelectedItem())));
+						} catch (SQLException e1) {
+							JOptionPane.showMessageDialog(altaCiutat,  "ERROR! En llistar els Districtes (VistaAltaCiutat, lin. 1)\n\n"+e1.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
+						}
+					}
+				});
+			} catch (SQLException e) {
+				JOptionPane.showMessageDialog(altaCiutat,  "ERROR! En llistar els Paisos (VistaAltaCiutat, lin. 107)\n\n"+e.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
+			}
 			GridBagConstraints gbc_cbxPais = new GridBagConstraints();
 			gbc_cbxPais.fill = GridBagConstraints.HORIZONTAL;
 			gbc_cbxPais.insets = new Insets(0, 0, 5, 0);
 			gbc_cbxPais.gridx = 1;
 			gbc_cbxPais.gridy = 2;
-			pnlContingut.add(cbxPais, gbc_cbxPais);
+			pnlContingut.add(cbxPais_1, gbc_cbxPais);
 		}
 		{
 			JLabel lblDistricte = new JLabel("Districte:");
@@ -111,7 +140,11 @@ public class VistaNovaCiutat extends JDialog {
 			pnlContingut.add(lblDistricte, gbc_lblDistricte);
 		}
 		{
-			JComboBox cbxDistricte = new JComboBox();
+			try {
+				cbxDistricte = new JComboBox<String>(DataActions.getVectorDistrictes((String)cbxPais_1.getSelectedItem()));
+			} catch (SQLException e) {
+				JOptionPane.showMessageDialog(altaCiutat,  "ERROR! En llistar els Districtes (VistaAltaCiutat, lin. 1)\n\n"+e.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
+			}
 			GridBagConstraints gbc_cbxDistricte = new GridBagConstraints();
 			gbc_cbxDistricte.insets = new Insets(0, 0, 5, 0);
 			gbc_cbxDistricte.fill = GridBagConstraints.HORIZONTAL;
@@ -142,17 +175,29 @@ public class VistaNovaCiutat extends JDialog {
 			pnlBotons.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(pnlBotons, BorderLayout.SOUTH);
 			{
-				JButton okButton = new JButton("OK");
-				okButton.setActionCommand("OK");
-				pnlBotons.add(okButton);
-				getRootPane().setDefaultButton(okButton);
+				JButton btnAfegir = new JButton("Afegeix");
+				btnAfegir.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						
+						altaCiutat.dispose();
+					}
+				});
+				btnAfegir.setActionCommand("OK");
+				pnlBotons.add(btnAfegir);
+				getRootPane().setDefaultButton(btnAfegir);
 			}
 			{
-				JButton cancelButton = new JButton("Cancel·lar");
-				cancelButton.setActionCommand("Cancel");
-				pnlBotons.add(cancelButton);
+				JButton btnCancelar = new JButton("Cancel·lar");
+				btnCancelar.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						altaCiutat.dispose();
+					}
+				});
+				btnCancelar.setActionCommand("Cancel");
+				pnlBotons.add(btnCancelar);
 			}
 		}
+		
 	}
 
 }
