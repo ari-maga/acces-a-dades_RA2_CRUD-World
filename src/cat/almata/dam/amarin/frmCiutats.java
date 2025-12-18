@@ -104,7 +104,7 @@ public class frmCiutats {
 				VistaNovaCiutat  altaCiutat= new VistaNovaCiutat(finestraCiutats);
 				altaCiutat.setVisible(true);
 				//desactivo la finestra actual perque sino podria obrir múltiples instancies de d'alata
-				finestraCiutats.setEnabled(false);
+				//finestraCiutats.setEnabled(false);
 			}
 		});
 		pnlInferior.add(btnNovaCiutat);
@@ -121,16 +121,18 @@ public class frmCiutats {
 		JButton btnEsborraCiutat = new JButton("Esborra Ciutat");
 		btnEsborraCiutat.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String nomCiutat =  (String) tblCiutats.getValueAt(tblCiutats.getSelectedRow(), 0);
-				String nomPais =  (String) tblCiutats.getValueAt(tblCiutats.getSelectedRow(), 1);
-				//borro la ciutat a la base de dades
-				try {
-					DataActions.deleteCiutat(nomCiutat, nomPais);
-				} catch (SQLException e1) {
-					JOptionPane.showMessageDialog(finestraCiutats,  "ERROR! En esborrar la ciutat "+nomCiutat+" (frmCiutats, lin. 121)\n\n"+e1.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
+				if(tblCiutats.getSelectedRow()>=0) {
+					String nomCiutat =  (String) tblCiutats.getValueAt(tblCiutats.getSelectedRow(), 0);
+					String nomPais =  (String) tblCiutats.getValueAt(tblCiutats.getSelectedRow(), 1);
+					//borro la ciutat a la base de dades
+					try {
+						DataActions.deleteCiutat(nomCiutat, nomPais);
+					} catch (SQLException e1) {
+						JOptionPane.showMessageDialog(finestraCiutats,  "ERROR! En esborrar la ciutat "+nomCiutat+" (frmCiutats, lin. 121)\n\n"+e1.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
+					}
+					//borro la ciutat de la taula
+					((DefaultTableModel)tblCiutats.getModel()).removeRow(tblCiutats.getSelectedRow());
 				}
-				//borro la ciutat de la taula
-				((DefaultTableModel)tblCiutats.getModel()).removeRow(tblCiutats.getSelectedRow());
 			}
 		});
 		pnlInferior.add(btnEsborraCiutat);

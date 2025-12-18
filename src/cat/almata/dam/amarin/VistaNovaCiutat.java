@@ -10,6 +10,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.GridBagLayout;
+import java.awt.HeadlessException;
+
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
@@ -93,7 +95,7 @@ public class VistaNovaCiutat extends JDialog {
 			txfNom.addKeyListener(new KeyAdapter() {
 				@Override
 				public void keyTyped(KeyEvent e) {
-					if(txfNom.getText().length()>34) {
+					if(txfNom.getText().length()>33) {
 						e.consume();
 					}
 				}
@@ -209,10 +211,62 @@ public class VistaNovaCiutat extends JDialog {
 				JButton btnAfegir = new JButton("Afegeix");
 				btnAfegir.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
+						//Comprovar que la ciutat no estigui repetida
+						//Comprovar que la població estigui entre els limits establerts
+						if(comprovacioCiutatRepetida() && comprovacioPoblacio()) {
+							//Crear la ciutat
+							try {
+								DataActions.createCiutat(new DTOMainformCiutat(
+										txfNom.getText(),
+										(String) cbxPais_1.getSelectedItem(),
+										(String) cbxDistricte.getSelectedItem(),
+										Long.parseLong(txfPoblacio.getText())
+										));
+							} catch (SQLException e1) {
+								JOptionPane.showMessageDialog(altaCiutat,  "ERROR! En crear la nova ciutat (VistaAltaCiutat, lin. 219)\n\n"+e1.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
+							}
+							
+							
+							//Torna a la taula de ciutats
+							altaCiutat.dispose();
+							owner.setEnabled(true);
+							owner.requestFocus();
+						}
 						
-						altaCiutat.dispose();
-						owner.setEnabled(true);
-						owner.requestFocus();
+					}
+					private boolean comprovacioCiutatRepetida() {
+						try {
+							if(!DataActions.esCiutatRepetida(txfNom.getText(), (String)  cbxPais_1.getSelectedItem())) {
+								return true;
+							}else {
+								JOptionPane.showMessageDialog(altaCiutat,  "ERROR! Ja hi ha una ciutat en aquest país amb aquest nom!","Nom no vàlid", JOptionPane.WARNING_MESSAGE);
+								txfNom.setText("");
+								txfNom.requestFocus();
+							}
+						} catch (HeadlessException e) {
+							JOptionPane.showMessageDialog(altaCiutat,  "ERROR! Excepió no prevista (VistaAltaCiutat, lin. 233)\n\n"+e.getMessage(),"Error de Headless Exception", JOptionPane.ERROR_MESSAGE);
+							return false;
+						} catch (SQLException e) {
+							JOptionPane.showMessageDialog(altaCiutat,  "ERROR! En buscar si la ciutat esta repeticda en base de dades (VistaAltaCiutat, lin. 233)\n\n"+e.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
+							return false;
+						}
+						return false;
+						
+					}
+					private boolean comprovacioPoblacio() {
+						long num;
+						//miro que sigui un numero amb el que pugi tractar
+						try {
+							num  = Long.parseLong(txfPoblacio.getText());
+						}catch (NumberFormatException e) {
+							JOptionPane.showMessageDialog(altaCiutat,  "ERROR! La població introduïda no és vàlida.\nComprova que la població sigui un numero d'entre\n10.000 i 5.000.000.000","Població no vàlida", JOptionPane.WARNING_MESSAGE);
+							return false;
+						}
+						if(num>=10000&&num<=5000000000L)return true;
+						else{
+							JOptionPane.showMessageDialog(altaCiutat,  "ERROR! La població introduïda no és vàlida.\nComprova que la població sigui un numero d'entre\n10.000 i 5.000.000.000","Població no vàlida", JOptionPane.WARNING_MESSAGE);
+							return false;
+						}
 					}
 				});
 				btnAfegir.setActionCommand("OK");
