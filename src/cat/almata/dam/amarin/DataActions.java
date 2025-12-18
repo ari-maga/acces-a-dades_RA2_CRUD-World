@@ -9,14 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.ComboBoxModel;
 
 public class DataActions {
 	
 	public static List<DTOMainformCiutat> getAllCiutats() throws SQLException{
 		try(Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/world" ,"root","user")){
 			//Aquest és l'sql que s'executara en base de dades
-			String sql = "SELECT city.name as cityname, country.name as countryname, district, city.population as citypopulation "
+			String sql = "SELECT id,city.name as cityname, country.name as countryname, district, city.population as citypopulation "
 					+ "FROM city LEFT JOIN country ON city.CountryCode=country.code order by cityname;";
 			Statement statement = con.createStatement();
 			ResultSet  result = statement.executeQuery(sql);
@@ -24,6 +23,7 @@ public class DataActions {
 			//de cada resultat creo una nova instancia de la classe ciutat i la posa a dins de la llista
 			while(result.next()) {
 				ciutats.add(new DTOMainformCiutat(
+						result.getInt("id"),
 						result.getString("cityname"),
 						result.getString("countryname"),
 						result.getString("district"),
@@ -39,13 +39,14 @@ public class DataActions {
 	}
 	public static List<DTOMainformCiutat> getCiutats(String nomCiutat) throws SQLException{
 		try(Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/world" ,"root","user")){
-			String sql = "SELECT city.name as cityname, country.name as countryname, district, city.population as citypopulation "
+			String sql = "SELECT id, city.name as cityname, country.name as countryname, district, city.population as citypopulation "
 					+ "FROM city LEFT JOIN country ON city.CountryCode=country.code WHERE city.name LIKE '%"+nomCiutat+"%' ORDER BY cityname;";
 			Statement statement = con.createStatement();
 			ResultSet  result = statement.executeQuery(sql);
 			List<DTOMainformCiutat> ciutats = new ArrayList<DTOMainformCiutat>();
 			while(result.next()) {
 				ciutats.add(new DTOMainformCiutat(
+						result.getInt("id"),
 						result.getString("cityname"),
 						result.getString("countryname"),
 						result.getString("district"),
@@ -56,6 +57,28 @@ public class DataActions {
 			statement.close();
 			con.close();
 			return ciutats;
+		}
+	}
+	public static DTOMainformCiutat getCiutat(String nomCiutat,String nomPais) throws SQLException{
+		try(Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/world" ,"root","user")){
+			String sql = "SELECT id,city.name as cityname, country.name as countryname, district, city.population as citypopulation "
+					+ "FROM city INNER JOIN country ON city.CountryCode=country.code WHERE city.name = '"+nomCiutat+"' AND country.name = '"+nomPais+"'";
+			Statement statement = con.createStatement();
+			ResultSet  result = statement.executeQuery(sql);
+			DTOMainformCiutat  ciutat;
+			result.next();
+			ciutat = new DTOMainformCiutat(
+					result.getInt("id"),
+					result.getString("cityname"),
+					result.getString("countryname"),
+					result.getString("district"),
+					result.getLong("citypopulation")
+					);
+			
+			result.close();
+			statement.close();
+			con.close();
+			return ciutat;
 		}
 	}
 	public static Vector<String> getVectorPaisos() throws SQLException {
@@ -90,16 +113,15 @@ public class DataActions {
 			return districtes;
 		}
 	}
-	public static boolean esCiutatRepetida(String nomCiutat, String nomPais) throws SQLException{
+	public static boolean esCiutatRepetida(DTOMainformCiutat ciutat) throws SQLException{
 		try(Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/world" ,"root","user")){
 			int contador=0;
 			//Aquest és l'sql que s'executara en base de dades
 			String sql = "SELECT * FROM city INNER JOIN country ON city.CountryCode=country.code "
-					+ "WHERE city.name ='"+nomCiutat+"' AND country.name = '"+nomPais+"';";
+					+ "WHERE city.name ='"+ciutat.getNom()+"' AND country.name = '"+ciutat.getPais()+"' AND id <>"+ciutat.getId()+";";
 			
 			Statement statement = con.createStatement();
 			ResultSet  result = statement.executeQuery(sql);
-			List<DTOMainformCiutat> ciutats = new ArrayList<DTOMainformCiutat>();
 			//de cada resultat sumo 1 al contador perque si és superior a 1 aleshores voldrà dir que hi haurà alguna ciutat al mateix pais
 			while(result.next()) {
 				contador++;
@@ -127,6 +149,7 @@ public class DataActions {
 	
 
 	public static void createCiutat(DTOMainformCiutat ciutat) throws SQLException{
+		//El limit de base de dades de population es de 32bits i per tant no pot soportar numeros més grans
 		try(Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/world" ,"root","user")){
 			String sql = "INSERT INTO city(name,countrycode,district,population) "
 					+ "VALUES('"+ciutat.getNom()+
@@ -158,4 +181,17 @@ public class DataActions {
 			return codi;
 		}
 	}
+	public static void updateCiutat(DTOMainformCiutat ciutat) throws SQLException {
+		//El limit de base de dades de population es de 32bits i per tant no pot soportar numeros més grans
+		try(Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/world" ,"root","user")){
+			String sql = "UPDATE city "
+					+ "SET name = '"+ciutat.getNom()+"', countrycode = (SELECT DISTINCT code FROM country WHERE name = '"+ciutat.getPais()+"'), "
+					+ " district = '"+ciutat.getDistricte()+ "', population = "+ciutat.getPoblacio()
+					+ " WHERE ID = "+ciutat.getId()+";";
+			Statement statement = con.createStatement();
+			statement.executeUpdate(sql);
+			statement.close();
+			con.close();
+		}		
+}		
 }

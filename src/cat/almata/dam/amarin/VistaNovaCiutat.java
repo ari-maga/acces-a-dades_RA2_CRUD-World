@@ -3,7 +3,6 @@ package cat.almata.dam.amarin;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
-import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -22,9 +21,7 @@ import javax.swing.JComboBox;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.util.Vector;
 import java.awt.event.ActionEvent;
-import javax.swing.SwingConstants;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
@@ -35,7 +32,6 @@ public class VistaNovaCiutat extends JDialog {
 	private JTextField txfNom;
 	private JTextField txfPoblacio;
 	private VistaNovaCiutat altaCiutat;
-	private JComboBox<String> cbxPais;
 	private JComboBox<String> cbxPais_1;
 	private JComboBox<String> cbxDistricte;
 
@@ -119,7 +115,7 @@ public class VistaNovaCiutat extends JDialog {
 			pnlContingut.add(lblPais, gbc_lblPais);
 		}
 		{
-			cbxPais = new JComboBox<String>();
+			cbxPais_1 = new JComboBox<String>();
 			try {
 				cbxPais_1 = new JComboBox<String>(DataActions.getVectorPaisos());
 				cbxPais_1.addActionListener(new ActionListener() {
@@ -213,7 +209,7 @@ public class VistaNovaCiutat extends JDialog {
 					public void actionPerformed(ActionEvent e) {
 						//Comprovar que la ciutat no estigui repetida
 						//Comprovar que la població estigui entre els limits establerts
-						if(comprovacioCiutatRepetida() && comprovacioPoblacio()) {
+						if(comprovacioPoblacio()&&comprovacioCiutatRepetida() ) {
 							//Crear la ciutat
 							try {
 								DataActions.createCiutat(new DTOMainformCiutat(
@@ -235,8 +231,14 @@ public class VistaNovaCiutat extends JDialog {
 						
 					}
 					private boolean comprovacioCiutatRepetida() {
+						DTOMainformCiutat ciutat = new DTOMainformCiutat(
+								txfNom.getText(),
+								(String) cbxPais_1.getSelectedItem(),
+								(String) cbxDistricte.getSelectedItem(),
+								Long.parseLong(txfPoblacio.getText())
+								);
 						try {
-							if(!DataActions.esCiutatRepetida(txfNom.getText(), (String)  cbxPais_1.getSelectedItem())) {
+							if(!DataActions.esCiutatRepetida(ciutat)) {
 								return true;
 							}else {
 								JOptionPane.showMessageDialog(altaCiutat,  "ERROR! Ja hi ha una ciutat en aquest país amb aquest nom!","Nom no vàlid", JOptionPane.WARNING_MESSAGE);

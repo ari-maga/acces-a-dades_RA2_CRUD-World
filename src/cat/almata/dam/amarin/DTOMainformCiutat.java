@@ -2,6 +2,7 @@ package cat.almata.dam.amarin;
 
 public class DTOMainformCiutat {
 	
+	private int id = -1;
 	private String nom;
 	private String pais;
 	private String districte;
@@ -14,6 +15,20 @@ public class DTOMainformCiutat {
 		setPais(pais);
 		setDistricte(districte);
 		setPoblacio(poblacio);
+	}
+	public DTOMainformCiutat(int id,String nom, String pais, String districte, long poblacio) {
+		setId(id);
+		setNom(nom);
+		setPais(pais);
+		setDistricte(districte);
+		setPoblacio(poblacio);
+	}
+	public int getId() {
+		return id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 	public String getNom() {

@@ -22,7 +22,7 @@ import java.util.List;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-public class frmCiutats {
+public class Aplicacio {
 
 	private JFrame finestraCiutats;
 	private JTable tblCiutats;
@@ -35,7 +35,7 @@ public class frmCiutats {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					frmCiutats window = new frmCiutats();
+					Aplicacio window = new Aplicacio();
 					window.finestraCiutats.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -47,7 +47,7 @@ public class frmCiutats {
 	/**
 	 * Create the application.
 	 */
-	public frmCiutats() {
+	public Aplicacio() {
 		initialize();
 	}
 
@@ -56,6 +56,7 @@ public class frmCiutats {
 	 */
 	private void initialize() {
 		finestraCiutats = new JFrame();
+		finestraCiutats.setVisible(true);
 		finestraCiutats.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowOpened(WindowEvent e) {
@@ -112,8 +113,17 @@ public class frmCiutats {
 		JButton btnModificaCiutat = new JButton("Modifica Ciutat");
 		btnModificaCiutat.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//VistaNovaCiutat  updateCiutat= new VistaEditaCiutat(finestraCiutats);
-				//updateCiutat.setVisible(true);
+				if(tblCiutats.getSelectedRow()>=0) {
+					String nomCiutat =  (String) tblCiutats.getValueAt(tblCiutats.getSelectedRow(), 0);
+					String nomPais =  (String) tblCiutats.getValueAt(tblCiutats.getSelectedRow(), 1);
+					VistaModificaCiutat updateCiutat;
+					try {
+						updateCiutat = new VistaModificaCiutat(finestraCiutats,DataActions.getCiutat(nomCiutat, nomPais));
+						updateCiutat.setVisible(true);
+					} catch (SQLException e1) {
+						JOptionPane.showMessageDialog(finestraCiutats,  "ERROR! En buscar la ciutat "+nomCiutat+" de "+nomPais+" en base de dades \n(frmCiutats, lin. 121)\n\n"+e1.getMessage(),"Error de SQL", JOptionPane.ERROR_MESSAGE);
+					}
+				}
 			}
 		});
 		pnlInferior.add(btnModificaCiutat);
